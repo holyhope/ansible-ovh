@@ -1,0 +1,42 @@
+---
+- name: Create OVHcloud consumer key
+  holyhope.ovh.new_consumer_key:
+    accesses: "{{ accesses | default({}) }}"
+    endpoint: "{{ endpoint | default('ovh-eu') }}"
+    application_key: "{{ application_key | mandatory }}"
+    application_secret: "{{ application_secret | mandatory }}"
+    redirect_url: 'http://localhost:8080/validate?id={{ ansible_play_name }}'
+  register: result_ck
+
+- name: Save consumer key to Ansible facts
+  ansible.builtin.set_fact:
+    consumer_key: "{{ result_ck.consumer_key }}"
+  no_log: True
+
+- name: "Please validate OVHcloud consumer key: {{ result_ck.validation_url }}"
+  holyhope.ovh.wait_for_request:
+    port: 8080
+
+- name: Check OVHcloud consumer key
+  holyhope.ovh.consumer_key:
+    endpoint: "{{ endpoint | default('ovh-eu') }}"
+    application_key: "{{ application_key }}"
+    application_secret: "{{ application_secret }}"
+    consumer_key: "{{ consumer_key }}"
+  register: result_ck
+  failed_when: result_ck.state != 'validated'
+
+- name: Update allowed ips
+  holyhope.ovh.allowed_ips:
+    ips: "{{ ips }}"
+    endpoint: "{{ endpoint | default('ovh-eu') }}"
+    application_key: "{{ ansible_application_key | mandatory }}"
+    application_secret: "{{ ansible_application_secret | mandatory }}"
+    consumer_key: "{{ ansible_consumer_key | mandatory }}"
+    subject_credentials_id: "{{ result_ck.credential_id | mandatory }}"
+  when: ips
+
+- name: OVHcloud Consumer key is now valid
+  ansible.builtin.debug:
+    var: consumer_key
+...

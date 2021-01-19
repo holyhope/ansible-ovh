@@ -1,2 +1,3 @@
-# ansible-ovh
-Ansible collection for OVHcloud
+# Ansible Collection - holyhope.ovh
+
+This Ansible collection manage OVHcloud resources.

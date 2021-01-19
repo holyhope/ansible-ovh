@@ -1,0 +1,5 @@
+-r requirements.txt
+ansible-lint>=4.3.5
+flake8>=3.8.4
+mypy>=0.790
+flake8-formatter-junit-xml>=0.0.6

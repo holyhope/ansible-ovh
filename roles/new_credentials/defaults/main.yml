@@ -1,0 +1,12 @@
+---
+ips: []
+# accesses: {}
+
+# ansible_application_key: "{{ application_key }}"
+# ansible_application_secret: "{{ application_secret }}"
+# ansible_consumer_key: "{{ consumer_key }}"
+
+
+# application_key: "{{ application_key }}"
+# application_secret: "{{ application_secret }}"
+...
