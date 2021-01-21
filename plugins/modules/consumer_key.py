@@ -15,6 +15,12 @@ try:
 except ImportError:
     ovh = None
 
+try:
+    from warnings import warn
+except ImportError:
+    def warn(*args, **kwargs):  # type: ignore
+        None
+
 from ansible_collections.holyhope.ovh.plugins.module_utils.authenticated import \
     AuthenticatedOVHModuleBase
 
@@ -117,7 +123,8 @@ class ConsumerKeyModule(AuthenticatedOVHModuleBase):
         try:
             default_value.update(self.client.get('/auth/currentCredential'))
             return default_value
-        except ovh.InvalidCredential:
+        except ovh.InvalidCredential as e:
+            warn("invalid credentials", RuntimeWarning, source=e)
             return default_value
 
     def update_results(self, state: 'Optional[str]', credential_id: 'Optional[int]',
