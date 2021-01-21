@@ -39,7 +39,6 @@ update: update-playbook.yml
 
 # https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/_data/completion/docker.txt
 TEST_DOCKER_IMAGE := default
-TEST_DOCKER_BASE_IMAGE := debian:10
 
 .PHONY:test
 test: dep lint doctest sanity-tests
@@ -48,12 +47,12 @@ test: dep lint doctest sanity-tests
 sanity-tests:
 	$(MAKE) install INSTALL_DIR=$(CURDIR)
 	cd '$(CURDIR)/ansible_collections/$(subst .,/,$(COLLECTION))' ; \
-		ansible-test sanity --docker $(TEST_DOCKER_IMAGE) --image $(TEST_DOCKER_BASE_IMAGE) -v
+		ansible-test sanity --docker $(TEST_DOCKER_IMAGE) -v
 	cd '$(CURDIR)/ansible_collections/$(subst .,/,$(COLLECTION))' ; \
 		test ! -d tests/unit || ansible-test units --docker $(TEST_DOCKER_IMAGE) -v
 	cd '$(CURDIR)/ansible_collections/$(subst .,/,$(COLLECTION))' ; \
 		test ! -d tests/integration/targets || ansible-test integration --docker $(TEST_DOCKER_IMAGE) -v
-	$(MAKE) clean
+	rm $(CURDIR)/ansible_collections
 
 define CONGRATZ
 Congratulation! You can now use collections.
@@ -125,7 +124,7 @@ dep:
 clean:
 	rm -f *.tar.gz
 	rm -f junit-*.xml
-	rm -rf ansible_collections
+	rm -rf $(CURDIR)/ansible_collections
 	rm -rf .ansible-test
 	find . -type d -name .mypy_cache -exec rm -rf {} +
 	find . -type d -name __pycache__ -exec rm -rf {} +

@@ -129,6 +129,5 @@ dmypy.json
 .pyre/
 
 # Ansible
-ansible_collections
 *.tar.gz
 junit*
