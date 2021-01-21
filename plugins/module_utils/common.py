@@ -91,7 +91,8 @@ class OVHModuleBase(object):
 
         if not skip_exec:
             self.exec_module(**self.module.params)
-            self.module.exit_json(**self.results)
+
+        self.module.exit_json(**self.results)
 
     def __getattribute__(self, attribute: str) -> 'Any':
         try:
