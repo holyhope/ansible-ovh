@@ -7,7 +7,7 @@ try:
 except ImportError:
     # This passes the sanity import test, but does not provide a user friendly error message.
     # Doing so would require catching Exception for all imports of dependencies in modules and module_utils.
-    importlib = None # type: ignore # noqa
+    importlib = None  # type: ignore # noqa
 
 
 from ansible_collections.holyhope.ovh.plugins.module_utils.common import \

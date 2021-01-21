@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+from http import HTTPStatus
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from uuid import uuid4
+
 from ansible.module_utils.basic import AnsibleModule
 
 try:
@@ -12,9 +16,94 @@ try:
 except ImportError:
     TYPE_CHECKING = False
 
-from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from uuid import uuid4
+ANSIBLE_METADATA = {'metadata_version': '1.1',
+                    'status': ['preview'],
+                    'supported_by': 'holyhope'}
+
+DOCUMENTATION = '''
+---
+module: wait_for_request
+version_added: "0.0.1"
+short_description: Wait for a http request
+description:
+    - Wait for an http request to a specific port.
+options:
+    port:
+        description:
+            - The port to listen.
+        required: true
+    address:
+        description:
+            - The address to bind.
+        required: false
+        default: 0.0.0.0
+    response_status:
+        description:
+            - The status code to respond to the request.
+        default: 200
+        required: false
+    response_headers:
+        description:
+            - Headers to send to the client.
+        default:
+            Content-Type: "text/html;charset=utf-8",
+            Server: "Ansible - holyhole.ovh.wait_for_request"
+    response_body:
+        description:
+            - The html content to send to the client when requesting the address:port.
+        default: Success
+        required: false
+author:
+    - Pierre PÉRONNET <pierre.peronnet@ovhcloud.com>
+'''
+
+EXAMPLES = '''
+    - name: Wait for a HTTP request on a specific port.
+      holyhope.ovh.wait_for_request:
+        port: 8080
+'''
+
+RETURN = '''
+request_id:
+    description:
+        - The request ID header.
+        - The value come from header request and is returned in the header response.
+        - The ID is generated if no request_id is found in the request headers.
+    type: str
+    returned: always
+    sample: ddaa609c-028b-4a12-b1db-6cb598af5dc3
+method:
+    description:
+        - The request HTTP method.
+    type: str
+    returned: always
+    sample: GET
+path:
+    description:
+        - The request path.
+    type: str
+    returned: always
+    sample: /the/request/path
+client_addr
+    description:
+        - The ip address which sent the request.
+    type: str
+    returned: always
+    sample: 127.0.0.1
+user_agent:
+    description:
+        - The user agent of the requester.
+    type: str
+    returned: if specified in the request
+    sample: Mozilla/5.0 ...
+headers:
+    description:
+        - The headers from the request.
+    type: dict
+    returned: always
+    sample:
+        Host: "localhost:8080"
+'''
 
 
 class WaitForRequestModule(object):

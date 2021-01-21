@@ -20,7 +20,7 @@ try:
 except ImportError:
     # This passes the sanity import test, but does not provide a user friendly error message.
     # Doing so would require catching Exception for all imports of dependencies in modules and module_utils.
-    importlib = None # type: ignore # noqa
+    importlib = None  # type: ignore # noqa
 
 
 OVH_MIN_RELEASE = '1.32'
@@ -127,7 +127,7 @@ class OVHModuleBase(object):
     def client(self) -> ovh.Client:
         return self.delegated_client(self.consumer_key)
 
-    def delegated_client(self, consumer_key: 'Optional[str]') -> ovh.Client:
+    def delegated_client(self, consumer_key: 'Optional[str]' = None) -> ovh.Client:
         return ovh.Client(
             endpoint=self.endpoint,
             application_key=self.application_key,

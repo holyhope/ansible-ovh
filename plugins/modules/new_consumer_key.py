@@ -90,7 +90,7 @@ class NewConsumerKeyModule(OVHModuleBase):
         """Main module execution method"""
         self.debug("Creating the consumer key")
 
-        ck = self.delegated_client(None) \
+        ck = self.delegated_client() \
             .request_consumerkey(self._transform_accesses(self.accesses), self.redirect_url)
 
         self.update_results(True, ck['consumerKey'], ck['validationUrl'])
