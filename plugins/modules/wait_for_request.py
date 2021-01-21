@@ -4,15 +4,25 @@ __metaclass__ = type
 
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socket import timeout
 from uuid import uuid4
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.common.validation import check_type_str
 
 try:
     from typing import TYPE_CHECKING
 
     if TYPE_CHECKING:
-        from typing import Optional, Type
+        from typing import Callable, Optional, Type
+
+    class Handler(BaseHTTPRequestHandler):
+        raw_requestline: bytes
+        handle: 'Callable[[BaseHTTPRequestHandler], None]'
+
+    class Server(HTTPServer):
+        pass
+
 except ImportError:
     TYPE_CHECKING = False
 
@@ -109,6 +119,7 @@ headers:
 class WaitForRequestModule(object):
     request_id_header = 'X-Request-ID'
     user_agent_header = 'User-Agent'
+    default_content_type = "text/html;charset=utf-8"
 
     def __init__(self):
         arg_spec = dict(
@@ -121,24 +132,20 @@ class WaitForRequestModule(object):
                 required=False,
                 default='0.0.0.0'
             ),
-            method=dict(
-                type=str,
-                required=False,
-                default='GET'
-            ),
-            path=dict(
-                type=str,
-                required=False,
-                default=''
-            ),
             response_body=dict(
-                type=bytes,
+                type=lambda v: check_type_str(v).encode('utf-8'),
                 required=False,
-                default=b'Success',
+                default='Success',
+                no_log=True,
             ),
             response_headers=dict(
                 type=dict,
                 required=False,
+                no_log=True,
+                default={
+                    "Content-Type": self.default_content_type,
+                    "Server": "Ansible - holyhole.ovh.wait_for_request",
+                },
             ),
             response_status=dict(
                 type=int,
@@ -156,11 +163,15 @@ class WaitForRequestModule(object):
         address = self.module.params.get('address')
         port = self.module.params.get('port')
 
-        with HTTPServer((address, port), self.get_Handler()) as httpd:
+        with self.server((address, port), self.handler) as httpd:
             self.module.log("Waiting request", log_args=dict(server_address=httpd.server_address))
             httpd.handle_request()
 
+        if self.request is None:
+            self.module.fail_json(msg='no valid request',)
+
         self.module.exit_json(
+            changed=True,
             request_id=self.request_id,
             method=self.request.command,
             path=self.request.path,
@@ -176,11 +187,8 @@ class WaitForRequestModule(object):
 
         request.send_response(self.module.params.get('response_status'))
 
-        headers = self.module.params.get('response_headers')
-
-        if headers is not None:
-            for k, v in headers.items():
-                request.send_header(k, v)
+        for k, v in self.module.params.get('response_headers', {}).items():
+            request.send_header(k, v)
 
         self.request_id = request.headers.get(self.request_id_header, str(uuid4()))
         request.send_header(self.request_id_header, self.request_id)
@@ -189,9 +197,41 @@ class WaitForRequestModule(object):
 
         request.wfile.write(self.module.params.get('response_body'))
 
-    def get_Handler(self) -> 'Type[BaseHTTPRequestHandler]':
-        method = self.module.params.get('method')
-        return type('Handler', (BaseHTTPRequestHandler,), {'do_' + method: lambda request: self.handle(request)})
+    def handle_one_request(self, request: 'Handler'):
+        """Copied form BaseHTTPRequestHandler"""
+        try:
+            request.raw_requestline = request.rfile.readline(65537)
+            if len(request.raw_requestline) > 65536:
+                request.requestline = ''
+                request.request_version = ''
+                request.command = ''
+                request.send_error(HTTPStatus.REQUEST_URI_TOO_LONG)
+                return
+            if not request.raw_requestline:
+                request.close_connection = True
+                return
+            if not request.parse_request():
+                # An error code has been sent, just exit
+                return
+            self.handle(request)
+            request.wfile.flush()  # actually send the response if not already done.
+        except timeout as e:
+            # a read or a write timed out.  Discard this connection
+            request.log_error("Request timed out: %r", e)
+            request.close_connection = True
+            return
+
+    @property
+    def server(self) -> 'Type[Server]':
+        return type('Server', (HTTPServer,), {
+            # 'handle_error': self.handle_error,
+        })
+
+    @property
+    def handler(self) -> 'Type[Handler]':
+        return type('Handler', (BaseHTTPRequestHandler,), {
+            'handle_one_request': (lambda request: self.handle_one_request(request)),
+        })
 
 
 def main():
