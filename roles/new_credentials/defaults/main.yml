@@ -1,6 +1,11 @@
 ---
+waiting_port: 8080
+waiting_address: localhost
+
 ips: []
-# accesses: {}
+accesses: {}
+
+endpoint: ovh-eu
 
 # ansible_application_key: "{{ application_key }}"
 # ansible_application_secret: "{{ application_secret }}"

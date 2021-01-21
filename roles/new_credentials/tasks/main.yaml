@@ -1,11 +1,11 @@
 ---
 - name: Create OVHcloud consumer key
   holyhope.ovh.new_consumer_key:
-    accesses: "{{ accesses | default({}) }}"
-    endpoint: "{{ endpoint | default('ovh-eu') }}"
-    application_key: "{{ application_key | mandatory }}"
-    application_secret: "{{ application_secret | mandatory }}"
-    redirect_url: 'http://localhost:8080/validate?id={{ ansible_play_name }}'
+    accesses: "{{ accesses }}"
+    endpoint: "{{ endpoint }}"
+    application_key: "{{ application_key }}"
+    application_secret: "{{ application_secret }}"
+    redirect_url: "http://{{ waiting_address | mandatory }}:{{ waiting_port | mandatory }}/{{ ansible_play_name }}"
   register: result_ck
 
 - name: Save consumer key to Ansible facts
@@ -15,11 +15,13 @@
 
 - name: "Please validate OVHcloud consumer key: {{ result_ck.validation_url }}"
   holyhope.ovh.wait_for_request:
-    port: 8080
+    port: "{{ waiting_port }}"
+    address: "{{ waiting_address }}"
+    response_body: "{{ lookup('template', 'response.html.j2') }}"
 
 - name: Check OVHcloud consumer key
   holyhope.ovh.consumer_key:
-    endpoint: "{{ endpoint | default('ovh-eu') }}"
+    endpoint: "{{ endpoint }}"
     application_key: "{{ application_key }}"
     application_secret: "{{ application_secret }}"
     consumer_key: "{{ consumer_key }}"
@@ -29,11 +31,11 @@
 - name: Update allowed ips
   holyhope.ovh.allowed_ips:
     ips: "{{ ips }}"
-    endpoint: "{{ endpoint | default('ovh-eu') }}"
-    application_key: "{{ ansible_application_key | mandatory }}"
-    application_secret: "{{ ansible_application_secret | mandatory }}"
-    consumer_key: "{{ ansible_consumer_key | mandatory }}"
-    subject_credentials_id: "{{ result_ck.credential_id | mandatory }}"
+    endpoint: "{{ endpoint }}"
+    application_key: "{{ ansible_application_key }}"
+    application_secret: "{{ ansible_application_secret }}"
+    consumer_key: "{{ ansible_consumer_key }}"
+    subject_credentials_id: "{{ result_ck.credential_id }}"
   when: ips
 
 - name: OVHcloud Consumer key is now valid

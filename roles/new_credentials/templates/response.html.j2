@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+        
+        <title>Ansible - holyhope.ovh.new_credentials</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">Succeed!</h2>
+                    <h4 class="card-subtitle mb-2 text-muted">
+                        run <span id="run-id" class="font-monospace text-warning">{{ run_id }}</span>
+                        <script><!--
+                            var runID = document.getElementById('run-id');
+                            if ( !window.location.pathname.endsWith(runID.text) ) {
+                                runID.className = runID.className.replace('text-warning', ' text-danger');
+                            } else {
+                                runID.className = runID.className.replace('text-warning', ' text-success');
+                            }
+                        --></script>
+                    </h4>
+                    <p class="card-text">
+                        The consumer key is now valid.
+                        Please see the ansible playbook which just resumed.
+                    </p>
+                    <a href="javascript: window.close();" class="card-link">Close the window</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
