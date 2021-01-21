@@ -1,11 +1,15 @@
 ---
+- name: Generate unique run id
+  ansible.builtin.set_fact:
+    run_id: "{{ 10000 | random | checksum }}"
+
 - name: Create OVHcloud consumer key
   holyhope.ovh.new_consumer_key:
     accesses: "{{ accesses }}"
     endpoint: "{{ endpoint }}"
     application_key: "{{ application_key }}"
     application_secret: "{{ application_secret }}"
-    redirect_url: "http://{{ waiting_address | mandatory }}:{{ waiting_port | mandatory }}/{{ ansible_play_name }}"
+    redirect_url: "http://{{ waiting_address | mandatory }}:{{ waiting_port | mandatory }}/{{ run_id }}"
   register: result_ck
 
 - name: Save consumer key to Ansible facts
@@ -18,6 +22,8 @@
     port: "{{ waiting_port }}"
     address: "{{ waiting_address }}"
     response_body: "{{ lookup('template', 'response.html.j2') }}"
+  register: request
+  failed_when: "run_id not in request.path"
 
 - name: Check OVHcloud consumer key
   holyhope.ovh.consumer_key:
