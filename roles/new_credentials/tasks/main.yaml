@@ -12,11 +12,6 @@
     redirect_url: "http://{{ waiting_address | mandatory }}:{{ waiting_port | mandatory }}/{{ run_id }}"
   register: result_ck
 
-- name: Save consumer key to Ansible facts
-  ansible.builtin.set_fact:
-    consumer_key: "{{ result_ck.consumer_key }}"
-  no_log: True
-
 - name: "Please validate OVHcloud consumer key: {{ result_ck.validation_url }}"
   holyhope.ovh.wait_for_request:
     port: "{{ waiting_port }}"
@@ -30,9 +25,9 @@
     endpoint: "{{ endpoint }}"
     application_key: "{{ application_key }}"
     application_secret: "{{ application_secret }}"
-    consumer_key: "{{ consumer_key }}"
-  register: result_ck
-  failed_when: result_ck.state != 'validated'
+    consumer_key: "{{ result_ck.consumer_key }}"
+  register: check_ck
+  failed_when: "check_ck.failed or check_ck.state != 'validated'"
 
 - name: Update allowed ips
   holyhope.ovh.allowed_ips:
@@ -41,10 +36,10 @@
     application_key: "{{ ansible_application_key }}"
     application_secret: "{{ ansible_application_secret }}"
     consumer_key: "{{ ansible_consumer_key }}"
-    subject_credentials_id: "{{ result_ck.credential_id }}"
+    subject_credentials_id: "{{ check_ck.credential_id }}"
   when: ips
 
-- name: OVHcloud Consumer key is now valid
-  ansible.builtin.debug:
-    var: consumer_key
+- name: Save consumer key to Ansible facts
+  ansible.builtin.set_fact:
+    consumer_key: "{{ result_ck.consumer_key }}"
 ...
