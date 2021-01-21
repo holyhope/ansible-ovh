@@ -17,6 +17,14 @@ try:
 except ImportError:
     ovh = object
 
+from urllib.parse import quote as urlquote
+
+try:
+    from warnings import warn
+except ImportError:
+    def warn(*args, **kwargs):  # type: ignore
+        None
+
 
 def check_type_access_method(method: 'Any') -> str:
     '''
@@ -44,6 +52,36 @@ def check_type_access_method(method: 'Any') -> str:
     return method
 
 
+def check_type_access_endpoint(endpoint: 'Any') -> str:
+    '''
+    >>> check_type_access_endpoint('/me')
+    '/me'
+    >>> check_type_access_endpoint('/me/api/application')
+    '/me/api/application'
+    >>> check_type_access_endpoint('/me/api/application/*')
+    '/me/api/application/*'
+    >>> check_type_access_endpoint({})
+    '%7B%7D'
+    >>> check_type_access_endpoint(0.3)
+    '0.3'
+    >>> import warnings
+    >>> warnings.simplefilter("ignore")
+    >>> check_type_access_endpoint('/test-with/{{ ansible_value | default(default_value) }}')
+    '/test-with/%7B%7B%20ansible_value%20%7C%20default%28default_value%29%20%7D%7D'
+    >>> warnings.simplefilter("error")
+    >>> check_type_access_endpoint('/test-with/{{ ansible_value | default(default_value) }}')
+    Traceback (most recent call last):
+        ...
+    UserWarning: endpoint has brackets
+    '''
+    endpoint = check_type_str(endpoint)
+    if '{{' in endpoint and '}}' in endpoint:
+        warn("endpoint has brackets", UserWarning)
+    endpoint = urlquote(endpoint, safe='*/')
+
+    return endpoint
+
+
 def check_type_accesses(accesses: 'Any') -> dict:
     '''
     >>> check_type_accesses(dict())
@@ -65,6 +103,8 @@ def check_type_accesses(accesses: 'Any') -> dict:
     result = accesses
 
     for (endpoint, perms) in accesses.items():
+        endpoint = check_type_access_endpoint(endpoint)
+
         result[endpoint] = []
 
         methods = check_type_list(perms)
