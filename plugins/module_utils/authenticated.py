@@ -31,7 +31,6 @@ COMMON_ARGS = dict(
 
 class AuthenticatedOVHModuleBase(OVHModuleBase):
     def __init__(self, derived_arg_spec, *args, **kwargs):
-
         merged_arg_spec = dict()
 
         merged_arg_spec.update(COMMON_ARGS)
@@ -39,7 +38,7 @@ class AuthenticatedOVHModuleBase(OVHModuleBase):
         if derived_arg_spec:
             merged_arg_spec.update(derived_arg_spec)
 
-        return super().__init__(derived_arg_spec=merged_arg_spec, *args, **kwargs)
+        super().__init__(derived_arg_spec=merged_arg_spec, *args, **kwargs)
 
     @property
     def client(self) -> ovh.Client:
