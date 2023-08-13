@@ -26,10 +26,8 @@ jobs:
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Publish Ansible Collection
-        # You may pin to the exact commit or the version.
-        # uses: arillso/action.ansible.collection@debaffe67537b2df7a5b430e492560cc66deb416
-        uses: artis3n/ansible_galaxy_collection@v2.2.1
+      - name: Ansible Publish
+        uses: ansible/ansible-publish-action@v1.0.0
         with:
           # Ansible Galaxy API key. This should be stored in a Secret on Github.
           api_key: '${{ secrets.GALAXY_API_KEY }}'
