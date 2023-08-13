@@ -7,7 +7,7 @@ namespace: holyhope
 name: ovh
 
 # The version of the collection. Must be compatible with semantic versioning
-version: 1.0.0
+version: 1.0.1
 
 # The path to the Markdown (.md) readme file. This path is relative to the root of the collection
 readme: README.md
@@ -15,7 +15,7 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- "Pierre PÉRONNET <pierre.peronnet@ovhcloud.com>"
+- "Pierre PÉRONNET <pierre.peronnet@ovhcloud.com> (https://github.com/sponsors/holyhope)"
 
 ### OPTIONAL but strongly recommended
 
