@@ -31,12 +31,6 @@ uninstall:
 	test -L '$(INSTALL_DIR)/ansible_collections/$(subst .,/,$(COLLECTION))' \
 		|| rm -rf '$(INSTALL_DIR)/ansible_collections/$(subst .,/,$(COLLECTION))'
 
-.PHONY:update
-update: update-playbook.yml
-	ansible-playbook \
-		-c local \
-		update-playbook.yml
-
 # https://github.com/ansible/ansible/blob/devel/test/lib/ansible_test/_data/completion/docker.txt
 TEST_DOCKER_IMAGE := default
 

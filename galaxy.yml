@@ -15,7 +15,7 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- "Pierre PÉRONNET <pierre.peronnet@ovhcloud.com> (https://github.com/sponsors/holyhope)"
+- "Pierre PÉRONNET (https://github.com/sponsors/holyhope)"
 
 ### OPTIONAL but strongly recommended
 
@@ -44,3 +44,14 @@ repository: https://github.com/holyhope/ansible-ovh
 
 # The URL to the collection issue tracker
 issues: https://github.com/holyhope/ansible-ovh/issues
+
+build_ignore:
+- .github/**
+- .gitignore
+- .git/**
+- '*.tar.gz'
+- ansible-lint.yaml
+- flake8
+- Makefile
+- mypy.ini
+- requirements-test.txt
